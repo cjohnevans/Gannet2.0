@@ -10,7 +10,7 @@ function [ MRS_struct ] = SiemensTwixRead(MRS_struct, fname,fname_water)
             %This handles the GABA data - it is needed whatever..
             %Use mapVBVD to pull in data.        
             twix_obj=mapVBVD(fname);
-            if(MRS_struct.p.Siemens_type==4)||(MRS_struct.p.Siemens_type==5)||(MRS_struct.p.Siemens_type==6)
+            if(MRS_struct.p.Siemens_type==4)||(MRS_struct.p.Siemens_type==5)||(MRS_struct.p.Siemens_type==6)||(MRS_struct.p.Siemens_type==7)
                 twix_obj=twix_obj{2};
             end
   %          save twix_obj
@@ -32,19 +32,27 @@ function [ MRS_struct ] = SiemensTwixRead(MRS_struct, fname,fname_water)
             fclose(fid);
             
             %Get Spectral width and Dwell Time
-            fid=fopen(fname);
-            line=fgets(fid);
-            index=findstr(line,'sRXSPEC.alDwellTime[0]');
-            equals_index=findstr(line,'= ');
-            while isempty(index) || isempty(equals_index)
+            %Check if twix_obj header is available
+            has_header = isfield(twix_obj,'hdr');
+            if has_header
+                dwelltime = twix_obj.hdr.MeasYaps.sRXSPEC.alDwellTime{1,1} * 1e-9;
+                spectralwidth=1/dwelltime;
+            else
+                fid=fopen(fname);
                 line=fgets(fid);
                 index=findstr(line,'sRXSPEC.alDwellTime[0]');
                 equals_index=findstr(line,'= ');
+                while isempty(index) || isempty(equals_index)
+                    line=fgets(fid);
+                    index=findstr(line,'sRXSPEC.alDwellTime[0]');
+                    equals_index=findstr(line,'= ');
+                end
+                dwelltime=line(equals_index+1:end);
+                dwelltime=str2double(dwelltime)*1e-9;
+                spectralwidth=1/dwelltime;
+                fclose(fid);
             end
-            dwelltime=line(equals_index+1:end);
-            dwelltime=str2double(dwelltime)*1e-9;
-            spectralwidth=1/dwelltime;
-            fclose(fid);
+            
             %Get TxFrq
             fid=fopen(fname);
             line=fgets(fid);
@@ -75,9 +83,6 @@ function [ MRS_struct ] = SiemensTwixRead(MRS_struct, fname,fname_water)
             %End of Jamie Near's code
             %Calculate some parameters:
             MRS_struct.p.sw=spectralwidth;
-            if (MRS_struct.p.Siemens_type == 4) || (MRS_struct.p.Siemens_type == 5) || (MRS_struct.p.Siemens_type == 6)
-                MRS_struct.p.sw=MRS_struct.p.sw/100;
-            end
             MRS_struct.p.LarmorFreq = Bo*42.577;          
             MRS_struct.p.nrows = twix_obj.image.NAcq;
             rc_xres = double(twix_obj.image.NCol);
@@ -128,6 +133,16 @@ function [ MRS_struct ] = SiemensTwixRead(MRS_struct, fname,fname_water)
                     %Undo Plus-minus 
                     %FullData(:,:,2,:)=-FullData(:,:,2,:);
                     FullData=reshape(FullData,[twix_obj.image.NCha twix_obj.image.NCol twix_obj.image.NAve*twix_obj.image.NSet]);
+                case 7
+                    %size(twix_obj.image())
+                    [twix_obj.image.NCol twix_obj.image.NCha twix_obj.image.NEco twix_obj.image.NSet];
+                    
+                    FullData=permute(reshape(double(twix_obj.image()),[twix_obj.image.NCol twix_obj.image.NCha twix_obj.image.NEco twix_obj.image.NSet]),[2 1 3 4]);
+
+                    %Undo Plus-minus 
+                    %FullData(:,:,2,:)=-FullData(:,:,2,:);
+                    %size(FullData)
+                    FullData=reshape(FullData,[twix_obj.image.NCha twix_obj.image.NCol twix_obj.image.NEco*twix_obj.image.NSet]);
             end
                 MRS_struct.p.Navg(ii) = double(twix_obj.image.NAcq);
                 %Trim off points at the start! RE 4/16/15 (Uncertain whether this should be done for all acquisitions or just some)
@@ -135,7 +150,7 @@ function [ MRS_struct ] = SiemensTwixRead(MRS_struct, fname,fname_water)
             %size(FullData)
             %Left-shift data by number_to_shift
             %save FullData
-            FullData=FullData(:,1:MRS_struct.p.npoints,:);
+            %FullData=FullData(:,1:MRS_struct.p.npoints,:);
             %size(FullData)
             %Combine data based upon first point of FIDs (mean over all
             %averages
@@ -152,7 +167,7 @@ function [ MRS_struct ] = SiemensTwixRead(MRS_struct, fname,fname_water)
         if(nargin==3)
            %Then we additionally need to pull in the water data. 
            twix_obj_water=mapVBVD(fname_water);
-           if(MRS_struct.p.Siemens_type==4) || (MRS_struct.p.Siemens_type==5) || (MRS_struct.p.Siemens_type==6)
+           if(MRS_struct.p.Siemens_type==4) || (MRS_struct.p.Siemens_type==5) || (MRS_struct.p.Siemens_type==6) || (MRS_struct.p.Siemens_type==7)
                 twix_obj_water=twix_obj_water{2};
            end
            MRS_struct.p.nrows_water = twix_obj_water.image.NAcq;
@@ -197,6 +212,11 @@ function [ MRS_struct ] = SiemensTwixRead(MRS_struct, fname,fname_water)
                         %Undo Plus-minus 
                         WaterData(:,:,2,:)=-WaterData(:,:,2,:);
                         WaterData=reshape(WaterData,[twix_obj_water.image.NCha twix_obj_water.image.NCol twix_obj_water.image.NAve*twix_obj_water.image.NSet]);
+                    case 7
+                        WaterData=permute(reshape(double(twix_obj_water.image()),[twix_obj_water.image.NCol twix_obj_water.image.NCha twix_obj_water.image.NEco twix_obj_water.image.NSet]),[2 1 3 4]);
+                        %Undo Plus-minus 
+                        WaterData(:,:,2,:)=-WaterData(:,:,2,:);
+                        WaterData=reshape(WaterData,[twix_obj_water.image.NCha twix_obj_water.image.NCol twix_obj_water.image.NEco*twix_obj_water.image.NSet]);
                end
 
           end
