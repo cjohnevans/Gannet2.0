@@ -196,10 +196,10 @@ function [ MRS_struct ] = SiemensTwixRead(MRS_struct, fname,fname_water)
                         WaterData=reshape(WaterData,[twix_obj_water.image.NCha twix_obj_water.image.NCol twix_obj_water.image.NSet*twix_obj_water.image.NIda]);
                     case 3 % above in case 3 didn't do the WaterData(:,:,2,:)=-WaterData(:,:,2,:); so commented out here. 
                        % Copy it into WaterData
-                        WaterData=permute(reshape(double(twix_obj_water.image()),[twix_obj_water.image.NCol twix_obj_water.image.NCha twix_obj_water.image.NSet twix_obj_water.image.NIda]),[2 1 4 3]);
+                        WaterData=permute(reshape(double(twix_obj_water.image()),[twix_obj_water.image.NCol twix_obj_water.image.NCha twix_obj_water.image.NAve twix_obj_water.image.NIde]),[2 1 4 3]);
                         %Undo Plus-minus 
                         %WaterData(:,:,2,:)=-WaterData(:,:,2,:);
-                        WaterData=reshape(WaterData,[twix_obj_water.image.NCha twix_obj_water.image.NCol twix_obj_water.image.NSet*twix_obj_water.image.NIda]);
+                        WaterData=reshape(WaterData,[twix_obj_water.image.NCha twix_obj_water.image.NCol twix_obj_water.image.NAve*twix_obj_water.image.NIde]);
                     case 4 % 
                        % Copy it into WaterData
                         WaterData=permute(reshape(double(twix_obj_water.image()),[twix_obj_water.image.NCol twix_obj_water.image.NCha twix_obj_water.image.NAve twix_obj_water.image.NIde]),[2 1 4 3]);
