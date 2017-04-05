@@ -47,12 +47,14 @@ function [AllFramesFTrealign MRS_struct] = Spectral_Registration(MRS_struct, OnW
     parsGuess=[0 0]; %initial freq and phase guess
     parsFit = zeros([size(flatdata,3) 2]);
     input.dwelltime=1/MRS_struct.p.sw;
-    time=((0:1:(MRS_struct.p.npoints-1)).'/MRS_struct.p.sw);
+    time=((0:1:(size(flatdata,1)-1)).'/MRS_struct.p.sw);
     %Fitting to determine frequency and phase corrections.
     for corrloop=1:size(flatdata,3)
         target=MRS_struct.fids.flattarget(:);
         transient=squeeze(flatdata(:,:,corrloop));
         input.data=transient(:);
+        % switch warnings off, GO 04/05/2017
+        warning('off','stats:nlinfit:IterationLimitExceeded');
         parsFit(corrloop,:)=nlinfit(input,target,@FreqPhaseShiftNest,parsGuess);
         parsGuess = parsFit(corrloop,:); %Carry parameters from point to point
     end   

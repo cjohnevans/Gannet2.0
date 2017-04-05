@@ -156,7 +156,7 @@ function [ MRS_struct ] = SiemensTwixRead(MRS_struct, fname,fname_water)
             %averages
             firstpoint=mean(conj(FullData(:,1,:)),3);
             channels_scale=squeeze(sqrt(sum(firstpoint.*conj(firstpoint))));
-            firstpoint=repmat(firstpoint, [1 MRS_struct.p.npoints MRS_struct.p.nrows])/channels_scale;
+            firstpoint=repmat(firstpoint, [1 size(FullData,2) MRS_struct.p.nrows])/channels_scale;
             %Multiply the Multichannel data by the firstpointvector
             % zeroth order phasing of spectra
             FullData = FullData.*firstpoint*MRS_struct.p.global_rescale;
