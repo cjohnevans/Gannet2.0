@@ -191,8 +191,9 @@ T1img_mas = T1img + .2*mask;
 %MRS_struct.mask.dim(MRS_struct.ii,:)=V.dim;
 %MRS_struct.mask.img(MRS_struct.ii,:,:,:)=T1img_mas;
 
-%FOR NOW NEED TO FIX
-%MRS_struct.mask.outfile(MRS_struct.ii,:)=fidoutmask;
+fidoutmask = cellstr(fidoutmask);
+MRS_struct.mask.outfile(MRS_struct.ii,:)=fidoutmask;
+MRS_struct.p.voxang(ii,:) = [NaN NaN NaN];  % put as NaN for now - for output page
 
 voxel_ctr(1:2)=-voxel_ctr(1:2);
 voxel_search=(XYZ(:,:)-repmat(voxel_ctr.',[1 size(XYZ,2)])).^2;
@@ -213,8 +214,8 @@ three_plane_img(:,1:size_max) = image_center(im1, size_max);
 three_plane_img(:,size_max*2+(1:size_max))=image_center(im3,size_max);
 three_plane_img(:,size_max+(1:size_max))=image_center(im2,size_max);
 
-MRS_struct.mask.img(MRS_struct.ii,:,:)=three_plane_img;
-
+MRS_struct.mask.img(ii,:,:)=three_plane_img;
+MRS_struct.mask.T1image(ii,:) = {nii_file};
 
 figure(198)
 imagesc(three_plane_img);
