@@ -112,7 +112,7 @@ figTitle = 'GannetSegment Output';
 set(gcf,'Name',figTitle,'Tag',figTitle, 'NumberTitle','off');
 % GABA plot
 
-h=subplot(2, 2, 1);    % a subplot of the voxel on the brain
+subplot(2, 2, 1);    % a subplot of the voxel on the brain
 
 % input=MRS_struct.mask.img(ii,:,1:round(size(MRS_struct.mask.img,3)/3));
 % size(input)
@@ -124,16 +124,16 @@ axis tight;
 axis off;
  
 
-h=subplot(2, 2, 3);    % replot of GABA fit spec
-    z=abs(MRS_struct.spec.freq-3.55);
-    lowerbound=find(min(z)==z);
-    z=abs(MRS_struct.spec.freq-2.79);
-    upperbound=find(min(z)==z);
-    freqbounds=lowerbound:upperbound;
-    freq=MRS_struct.spec.freq(1,freqbounds);
-    plot( ...
-        real(MRS_struct.spec.freq(1,:)),real(MRS_struct.spec.diff(ii,:)), ...
-        'k',freq,GaussModel_area(MRS_struct.out.GABAModelFit(ii,:),freq),'r');  % this part may be broken
+subplot(2, 2, 3);    % replot of GABA fit spec
+z=abs(MRS_struct.spec.freq-3.55);
+lowerbound=find(min(z)==z);
+z=abs(MRS_struct.spec.freq-2.79);
+upperbound=find(min(z)==z);
+freqbounds=lowerbound:upperbound;
+freq=MRS_struct.spec.freq(1,freqbounds);
+plot( ...
+    real(MRS_struct.spec.freq(1,:)),real(MRS_struct.spec.diff(ii,:)), ...
+    'k',freq,GaussModel_area(MRS_struct.out.GABAModelFit(ii,:),freq),'r');  % this part may be broken
         
 zz=abs(MRS_struct.spec.freq-3.6);
 Glx_right=find(min(zz)==zz);
@@ -220,7 +220,7 @@ subplot(2,2,4)
     script_path=which('GannetFit');
     Gannet_circle_white=[script_path(1:(end-12)) '/GANNET_circle_white.jpg'];
     A_2=imread(Gannet_circle_white);
-    hax=axes('Position',[0.80, 0.05, 0.15, 0.15]);
+    axes('Position',[0.80, 0.05, 0.15, 0.15]);
     image(A_2);axis off; axis square;
 
 
@@ -254,15 +254,15 @@ tmp = strfind(pfil_nopath,'/');
     elseif(strcmpi(MRS_struct.p.vendor,'GE'))
         tmp = strfind(pfil_nopath, '.7');
         dot7 = tmp(end); % just in case there's another .7 somewhere else...
-    elseif(strcmpi(MRS_struct.p.vendor,'Philips_data'))  % make this be sdat
+    elseif(strcmpi(MRS_struct.p.vendor,'Philips_data'))
         tmp = strfind(pfil_nopath, '.data');
         dot7 = tmp(end); % just in case there's another .data somewhere else...
-    elseif(strcmpi(MRS_struct.p.vendor,'Siemens'))  % make this be sdat
+    elseif(strcmpi(MRS_struct.p.vendor,'Siemens'))
         tmp = strfind(pfil_nopath, '.rda');
-        dot7 = tmp(end); % just in case there's another .data somewhere else...
-    elseif(strcmpi(MRS_struct.p.vendor,'Siemens_twix'))  % make this be sdat
+        dot7 = tmp(end); % just in case there's another .rda somewhere else...
+    elseif(strcmpi(MRS_struct.p.vendor,'Siemens_twix'))
         tmp = strfind(pfil_nopath, '.dat');
-        dot7 = tmp(end); % just in case there's another .data somewhere else...
+        dot7 = tmp(end); % just in case there's another .dat somewhere else...
     end
     pfil_nopath = pfil_nopath( (lastslash+1) : (dot7-1) );
 
