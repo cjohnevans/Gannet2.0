@@ -8,7 +8,7 @@ function [ MRS_struct ] = PhilipsRead(MRS_struct, fname, fname_water )
 % 110825
 
    % work out data header name
-   sparname = [fname(1:(end-4)) MRS_struct.p.spar_string]
+   sparname = [fname(1:(end-4)) MRS_struct.p.spar_string];
    sparheader = textread(sparname, '%s');
    sparidx=find(ismember(sparheader, 'samples')==1);
    MRS_struct.p.npoints = str2num(sparheader{sparidx+2});
@@ -56,8 +56,16 @@ function [ MRS_struct ] = PhilipsRead(MRS_struct, fname, fname_water )
    MRS_struct.fids.data = SDATreadMEGA(fname, MRS_struct.p.npoints, MRS_struct.p.nrows);
       
    if nargin>2
+       [~,~,sdatWaterExtension] = fileparts(fname_water);
+       sdatWaterExtensionChars = sdatWaterExtension(2:end);
+       if isstrprop(sdatWaterExtensionChars, 'upper')
+           sparnameW = [fname_water(1:(end-4)) 'SPAR'];
+       else
+           sparnameW = [fname_water(1:(end-4)) 'spar'];
+       end
+       
        % work out data header name
-       sparnameW = [fname_water(1:(end-4)) 'spar'];
+       
        sparheaderW = textread(sparnameW, '%s');
        sparidxW=find(ismember(sparheaderW, 'averages')==1);
        %MRS_struct.p.Nwateravg = str2num(sparheaderW{sparidxW+2});
